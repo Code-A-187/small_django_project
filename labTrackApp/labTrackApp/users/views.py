@@ -39,3 +39,4 @@ def logout_user(request):
     messages.success(request, 'You have been successfully logged out.')
 
     return redirect('home-page')
+
