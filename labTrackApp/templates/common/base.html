@@ -23,15 +23,15 @@
                     <a class="nav-link text-white mr-4" href="{% url 'home-page' %}">Home</a>
                 </li>
                 {% if user.is_authenticated %}
-                    <li class="nav-item">
+                    {% comment %} <li class="nav-item">
                         <a class="nav-link text-white" href="{% url 'profile-details' pk=user.pk %}">Profile</a>
-                    </li>
+                    </li> {% endcomment %}
                     <li class="nav-item">
                         <a class="nav-link text-white" href="{% url 'logout' %}">Logout</a>
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="btn btn-outline-light mr-2 text-nowrap" href="{% url 'login-page' %}">Sign In</a>
+                        <a class="btn btn-outline-light mr-2 text-nowrap" href="{% url 'login-page' %}">Log In</a>
                     </li>
                     <li class="nav-item">
                         <a class="btn btn-outline-light" href="{% url 'register-page' %}">Register</a>
