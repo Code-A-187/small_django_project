@@ -23,9 +23,9 @@
                     <a class="nav-link text-white mr-4" href="{% url 'home-page' %}">Home</a>
                 </li>
                 {% if user.is_authenticated %}
-                    {% comment %} <li class="nav-item">
-                        <a class="nav-link text-white" href="{% url 'profile-details' pk=user.pk %}">Profile</a>
-                    </li> {% endcomment %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{% url 'profile-page' pk=user.pk %}">Profile</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link text-white" href="{% url 'logout' %}">Logout</a>
                     </li>
