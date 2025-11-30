@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import logout
 from labTrackApp.users.forms import ProfileEditForm, UserRegisterForm
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import DetailView, UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import DetailView, UpdateView, DeleteView
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
@@ -47,8 +47,9 @@ class ProfileEditView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('profile-page')
 
     def test_func(self):
+        # Only allow users to delete their own profile
         profile = get_object_or_404(UserModel, pk=self.kwargs['pk'])
-        return self.request.user == profile.user
+        return self.request.user == profile
     
     def get_success_url(self):
         return reverse_lazy(
@@ -57,5 +58,29 @@ class ProfileEditView(LoginRequiredMixin, UpdateView):
             'pk': self.object.pk
             }
         )
+
+class ProfileDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = UserModel
+    template_name = 'common/delete.html'
+    success_url = reverse_lazy('home-page')
+
+    def test_func(self):
+        # Only allow users to delete their own profile
+        profile = get_object_or_404(UserModel, pk=self.kwargs['pk'])
+        return self.request.user == profile
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({
+            'object_type': 'User Profile',
+            'object_name': self.object.username,
+            'cancel_url': reverse_lazy('profile-details', kwargs={'pk': self.object.pk})
+        })
+    
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Your profile has been successfully deleted.')
+        logout(request)  # Log out the user after deletion
+
+        return super().delete(request, *args, **kwargs)
 
 
