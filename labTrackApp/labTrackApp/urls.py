@@ -21,5 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('labTrackApp.common.urls')),
     path('users/', include('labTrackApp.users.urls')),
+    path('instruments/', include('labTrackApp.instruments.urls')),
     
 ]
