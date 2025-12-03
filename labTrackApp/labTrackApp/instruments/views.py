@@ -1,7 +1,25 @@
 from django.shortcuts import render
-from django.views.generic import ListView, DetailView
-from .models import Instrument
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, ListView, DetailView
 
+from labTrackApp.instruments.forms import InstrumentAddForm, InstrumentDeleteForm, InstrumentEditForm
+from labTrackApp.mixins import AdminRequiredMixin
+from .models import Instrument
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Sum, Q, F
+
+class InstrumentAddView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
+    model = Instrument
+    form_class = InstrumentAddForm
+    template_name = 'instruments/instrument-create.html'
+
+    def form_valid(self, form):
+        form.instance.recorded_by = self.request.user 
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('instruments-page', kwargs={'pk': self.object.pk})
+    
 
 class InstrumentListView(ListView):
     model = Instrument
@@ -9,8 +27,61 @@ class InstrumentListView(ListView):
     context_object_name = 'instruments'
     paginate_by = 6
 
-class InstrumentDetailView(DetailView):
+    def get_queryset(self):
+        # Base QuerySet: Start with the default model manager's queryset
+        queryset = super().get_queryset()
+
+        # Annotation: Calculate the total maintenance cost for each instrument
+        # We use Sum to aggregate the 'cost' field from the related MaintenanceRecord model
+        # The annotated field 'total_maintenance_cost' is now available on every Instrument object.
+        qs = queryset.annotate(
+            total_maintenance_cost=Sum('maintenance_history__cost')
+        )
+        
+
+        # Filtering Logic (Filtering by 'status' via URL parameter)
+        status_filter = self.request.GET.get('status')
+        if status_filter:
+            # Filters the queryset to only instruments matching the requested status
+            queryset = queryset.filter(status=status_filter)
+
+        # Search Logic (Complex OR lookup using Q objects)
+        search_query = self.request.GET.get('q')
+        if search_query:
+            # Q objects allow building complex lookups like 'field A OR field B'
+            qs = queryset.filter(
+                Q(name__icontains=search_query) | # Case-insensitive partial match on instrument name
+                Q(serial_number__icontains=search_query) # Case-insensitive partial match on serial number
+            )
+            
+        # Final Ordering 
+        # Order by the calculated annotated field (cost descending), then by name
+        # Note: We can order by the annotated field 'total_maintenance_cost'
+        return qs.order_by('-total_maintenance_cost', 'model')
+
+    def get_context_data(self, **kwargs):
+        # Passes extra data needed for the template's filter form
+        context = super().get_context_data(**kwargs)
+        context['status_filter'] = self.request.GET.get('status', '') # Current selected status
+        context['search_query'] = self.request.GET.get('q', '')     # Current search term
+        context['status_choices'] = Instrument.status     # Pass choices for the filter dropdown
+        return context
+
+class InstrumentDetailView(LoginRequiredMixin, DetailView):
     model = Instrument
-    template_name= 'instruments/unstrument-details'
+    template_name= 'instruments/instrument-details.html'
     context_object_name = 'instrument'
 
+
+
+class InstrumentEditView():
+    model = Instrument
+    form_class = InstrumentEditForm
+    template_name = ""
+    context_object_name = ''
+
+class InstrumentDeleteView():
+    model = Instrument
+    form_class = InstrumentDeleteForm
+    template_name = ""
+    context_object_name = ''
