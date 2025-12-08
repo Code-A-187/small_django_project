@@ -1,8 +1,8 @@
-from django.shortcuts import render
-from django.urls import reverse_lazy
+from django.shortcuts import redirect, render
+from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView, DetailView
-
-from labTrackApp.instruments.forms import InstrumentAddForm, InstrumentDeleteForm, InstrumentEditForm
+from django.views.generic.edit import FormMixin
+from labTrackApp.instruments.forms import InstrumentAddForm, InstrumentDeleteForm, InstrumentEditForm, MaintenanceRecordForm
 from labTrackApp.mixins import AdminRequiredMixin
 from .models import Instrument
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -20,6 +20,8 @@ class InstrumentAddView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     def get_success_url(self):
         return reverse_lazy('instruments-page', kwargs={'pk': self.object.pk})
     
+    
+
 
 class InstrumentListView(ListView):
     model = Instrument
@@ -69,9 +71,8 @@ class InstrumentListView(ListView):
 
 class InstrumentDetailView(LoginRequiredMixin, DetailView):
     model = Instrument
-    template_name= 'instruments/instrument-details.html'
+    template_name = 'instruments/instrument-details.html'
     context_object_name = 'instrument'
-
 
 
 class InstrumentEditView():
@@ -85,3 +86,38 @@ class InstrumentDeleteView():
     form_class = InstrumentDeleteForm
     template_name = ""
     context_object_name = ''
+
+
+class InstrumentMaintenanceView(LoginRequiredMixin, FormMixin, DetailView):
+    model = Instrument
+    form_class = MaintenanceRecordForm
+    template_name = 'instruments/instrument-maintenance.html'
+    context_object_name = "instrument" 
+
+
+    def get_success_url(self):
+        return reverse('instrument-maintenance', kwargs={'pk': str(self.object.pk)})
+    
+    
+    def form_valid(self, form):
+        maintenance_record = form.save(commit=False)
+        maintenance_record.instrument = self.object
+        maintenance_record.recorded_by = self.request.user
+        maintenance_record.save()
+        return redirect(self.get_success_url())
+
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+            
+            
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = self.get_form()
+        context['maintenance_records'] = self.object.maintenance_history.all().order_by('-maintenance_date')
+        return context

@@ -1,5 +1,7 @@
 from django import forms
 from .models import Instrument
+from django import forms
+from .models import Instrument, MaintenanceRecord
 
 class InstrumentBaseForm(forms.ModelForm):
     class Meta:
@@ -16,3 +18,12 @@ class InstrumentEditForm(InstrumentBaseForm):
 
 class InstrumentDeleteForm(InstrumentBaseForm):
     pass
+
+
+class MaintenanceRecordForm(forms.ModelForm):
+    class Meta:
+        model = MaintenanceRecord
+        fields = ['maintenance_date', 'record_type', 'description', 'cost', 'performed_by']
+        widgets = {
+            'maintenance_date': forms.DateInput(attrs={'type': 'date'}),
+        }

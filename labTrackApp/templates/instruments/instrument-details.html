@@ -1,7 +1,7 @@
 {% extends 'common/base.html' %}
 
 {% block title %}Details: {{ instrument.name }}{% endblock %}
-
+{% load crispy_forms_tags %}
 {% block content %}
 <div class="container mx-auto max-w-lg p-2 mt-4">
     
@@ -11,18 +11,18 @@
             {{ instrument.name }}
         </h2>
         
-        {% comment %} <div class="flex space-x-2">
+        <div class="flex space-x-2">
             <!-- Edit Button -->
-            <a href="{% url 'instrument-update' pk=instrument.pk %}" 
+            <a href="#" 
                class="text-xs text-blue-600 hover:text-blue-800">
                 Edit
             </a>
             <!-- Delete Button -->
-            <a href="{% url 'instrument-delete' pk=instrument.pk %}" 
+            <a href="#" 
                class="text-xs text-red-600 hover:text-red-800">
                 Delete
             </a>
-        </div> {% endcomment %}
+        </div>
     </div>
 
     <!-- Details List (Purely Linear) -->
@@ -53,7 +53,9 @@
             <p class="text-gray-700 whitespace-pre-wrap">{{ instrument.description }}</p>
         </div>
 
-    </div>
+        <a href={% url 'instrument-maintenance' pk=instrument.pk%} class="text-sm px-3 py-1 bg-blue-600 text-blue rounded-md hover:bg-blue-700 transition">
+                    Maintenance History
+        </a>
     
     <!-- Back Link -->
     <div class="mt-6 pt-4 border-t text-right">
