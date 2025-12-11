@@ -58,7 +58,6 @@ MIDDLEWARE = [
 
     'labTrackApp.middleware.maintenance.MaintenanceMiddleware',
     'labTrackApp.middleware.logging.LoggingMiddleware',
-    'labTrackApp.middleware.cors.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'labTrackApp.urls'

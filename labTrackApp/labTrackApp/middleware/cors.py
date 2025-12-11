@@ -2,7 +2,7 @@ class CorsMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
-        self.allowed_origins = ['http://localhost:3000', 'https://your-frontend-domain.com']
+        self.allowed_origins = ['http://localhost:3000']
 
     def __call__(self, request):
         response = self.get_response(request)
