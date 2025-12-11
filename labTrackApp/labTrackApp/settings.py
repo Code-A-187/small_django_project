@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 
+from celery.schedules import crontab
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -159,3 +161,33 @@ AUTH_USER_MODEL = 'users.User'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+
+# --- CELERY CONFIGURATION ---
+# when using local server
+CELLERY_BROKER_URL = 'redis://localhost:6379/0'
+
+# optional(good practice) -  where task results are stored
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+
+CELERY_TIMEZONE = 'Europe/Sofia'
+
+# optional (for security)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+CELERY_BEAT_SCHEDULE = {
+    'check-due-maintenance-every-minute': {
+        'task': 'labTrackApp.instruments.tasks.process_maintenance_reminder',
+        # run every 1 minute for easy testing
+        'schedule': crontab(minute='*/1'), 
+        'args': ('Automated Minute Check', 'Due Date Check'), 
+    },
+    'debug-task-every-20-seconds': {
+        'task': 'labTrackApp.celery.debug_task',
+        # run every 20 seconds (uses float schedule)
+        'schedule': 20.0, 
+    },
+}
