@@ -55,6 +55,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'labTrackApp.middleware.maintenance.MaintenanceMiddleware',
+    'labTrackApp.middleware.logging.LoggingMiddleware',
+    'labTrackApp.middleware.cors.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'labTrackApp.urls'
@@ -118,6 +122,23 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': { # logging middleware writes to the 'django' logger
+            'handlers': ['console'],
+            'level': 'INFO', # level INFO to see the output
+            'propagate': True,
+        },
+    },
+}
 
 
 # Static files (CSS, JavaScript, Images)
