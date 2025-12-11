@@ -17,10 +17,26 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from django.urls import path, include
+from rest_framework import routers
+from labTrackApp.instruments.views import InstrumentViewSet
+from django.conf import settings
+
+
+router = routers.DefaultRouter()
+router.register(r'instruments', InstrumentViewSet)
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('labTrackApp.common.urls')),
     path('users/', include('labTrackApp.users.urls')),
     path('instruments/', include('labTrackApp.instruments.urls')),
-    
+    path('api/', include(router.urls)),   
 ]
+
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns = [
+        path('__debug__/', include(debug_toolbar.urls)),
+    ] + urlpatterns

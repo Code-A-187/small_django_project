@@ -6,7 +6,16 @@ from labTrackApp.instruments.forms import InstrumentAddForm, InstrumentDeleteFor
 from labTrackApp.mixins import AdminRequiredMixin
 from .models import Instrument
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Sum, Q, F
+from django.db.models import Sum, Q
+
+# for django rest framework
+from rest_framework import viewsets
+from .models import Instrument
+from .serializers import InstrumentSerializer
+
+# for djangofilter
+from rest_framework import viewsets
+from django_filters.rest_framework import FilterSet
 
 class InstrumentAddView(LoginRequiredMixin, AdminRequiredMixin, CreateView):
     model = Instrument
@@ -121,3 +130,16 @@ class InstrumentMaintenanceView(LoginRequiredMixin, FormMixin, DetailView):
         context['form'] = self.get_form()
         context['maintenance_records'] = self.object.maintenance_history.all().order_by('-maintenance_date')
         return context
+
+
+
+class InstrumentViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows Instruments to be viewed or edited.
+    Provides default CRUD operations (list, retrieve, create, update, destroy).
+    """
+    # queryset: define the data to be used
+    queryset = Instrument.objects.all().order_by('model')
+
+    # serializer: Define how to format the data
+    serializer_class = InstrumentSerializer

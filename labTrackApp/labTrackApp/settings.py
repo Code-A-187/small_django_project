@@ -40,12 +40,16 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'debug_toolbar',
+
     'labTrackApp.users.apps.UsersConfig',
     'labTrackApp.instruments.apps.InstrumentsConfig',
     'labTrackApp.common.apps.CommonConfig',
 
     'crispy_forms',
     'crispy_bootstrap5',
+
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -146,6 +151,9 @@ LOGGING = {
 
 STATIC_URL = '/static/'
 
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
 
 LOGIN_REDIRECT_URL = 'home-page'
 LOGIN_URL = 'login-page'
@@ -190,4 +198,12 @@ CELERY_BEAT_SCHEDULE = {
         # run every 20 seconds (uses float schedule)
         'schedule': 20.0, 
     },
+}
+
+# anable filtering logic
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+    'DEFAULT_FILTER_FORM_TEMPLATE': None
 }
